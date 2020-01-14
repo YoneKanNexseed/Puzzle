@@ -9,41 +9,31 @@
 import UIKit
 
 class ViewController: UIViewController {
-
-    var image = UIImage(named: "cat")
+    
+    let DIVISOR = CGFloat(5)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        var image = UIImage(named: "cat")
         image = image!.resized(toWidth: 400)
-        let pieceWidth = (image?.size.width)! / 4
-        let pieceHeight = (image?.size.height)! / 4
-     
-        let pieces = makePieces()
-        for i in 0...15 {
-            let piece = pieces[i]
-            let x = i / 4
-            let y = i % 4
-            
-            let imageView = UIImageView(image: piece)
-            imageView.frame = CGRect(x: CGFloat(x) * pieceWidth, y: CGFloat(y) * pieceHeight, width: pieceWidth + 10, height: pieceHeight + 10)
-            self.view.addSubview(imageView)
-        }
+        
+        createPuzzle(image: image!, divisor: DIVISOR)
+
     }
 
     
-    func makePieces() -> [UIImage] {
-        image = image!.resized(toWidth: 400)
+    func makePieces(image: UIImage, divisor: CGFloat) -> [UIImage] {
         
-        let pieceWidth = (image?.size.width)! / 4
-        let pieceHeight = (image?.size.height)! / 4
+        let pieceWidth = (image.size.width) / divisor
+        let pieceHeight = (image.size.height) / divisor
         
         var pieces: [UIImage] = []
         
-        for i in 0...3 {
+        for i in 0..<Int(divisor) {
             
-            for j in 0...3 {
-                let piece = image?.cropToRect(rect: CGRect(x: CGFloat(i) * pieceWidth, y: CGFloat(j) * pieceHeight, width: pieceWidth, height: pieceHeight))
+            for j in 0..<Int(divisor) {
+                let piece = image.cropToRect(rect: CGRect(x: CGFloat(i) * pieceWidth, y: CGFloat(j) * pieceHeight, width: pieceWidth, height: pieceHeight))
                 
                 pieces.append(piece!)
             }
@@ -53,26 +43,22 @@ class ViewController: UIViewController {
         return pieces
         
     }
-}
-
-extension UIImage {
-    // Crops an input image (self) to a specified rect
-    func cropToRect(rect: CGRect!) -> UIImage? {
-        // Correct rect size based on the device screen scale
-        let scaledRect = CGRect(x: rect.origin.x * self.scale, y: rect.origin.y * self.scale, width: rect.size.width * self.scale, height: rect.size.height * self.scale);
-        // New CGImage reference based on the input image (self) and the specified rect
-        let imageRef = self.cgImage!.cropping(to: scaledRect);
-        // Gets an UIImage from the CGImage
-        let result = UIImage(cgImage: imageRef!, scale: self.scale, orientation: self.imageOrientation)
-        // Returns the final image, or NULL on error
-        return result;
-    }
     
-    func resized(toWidth width: CGFloat) -> UIImage? {
-        let canvasSize = CGSize(width: width, height: CGFloat(ceil(width/size.width * size.height)))
-        UIGraphicsBeginImageContextWithOptions(canvasSize, false, scale)
-        defer { UIGraphicsEndImageContext() }
-        draw(in: CGRect(origin: .zero, size: canvasSize))
-        return UIGraphicsGetImageFromCurrentImageContext()
+    func createPuzzle(image: UIImage, divisor: CGFloat) {
+        let pieces = makePieces(image: image, divisor: divisor)
+        let maxCount = Int(divisor) * Int(divisor)
+        
+        let pieceWidth = (image.size.width) / divisor
+        let pieceHeight = (image.size.height) / divisor
+        
+        for i in 0..<maxCount {
+            let piece = pieces[i]
+            let x = i / Int(divisor)
+            let y = i % Int(divisor)
+            
+            let imageView = UIImageView(image: piece)
+            imageView.frame = CGRect(x: CGFloat(x) * pieceWidth, y: CGFloat(y) * pieceHeight, width: pieceWidth + 10, height: pieceHeight + 10)
+            self.view.addSubview(imageView)
+        }
     }
 }
